@@ -1,0 +1,28 @@
+# systemd-юніт для VPS без Docker.
+#   sudo cp deploy/linux/ai.service /etc/systemd/system/ai.service
+#   (виправте User і WorkingDirectory під себе)
+#   sudo systemctl daemon-reload && sudo systemctl enable --now ai
+#   journalctl -u ai -f        # логи
+[Unit]
+Description=AI server (own LLM)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ai
+WorkingDirectory=/opt/ai
+ExecStart=/usr/bin/node --env-file-if-exists=.env src/server/index.ts
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+
+# пісочниця
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/ai/checkpoints
+
+[Install]
+WantedBy=multi-user.target
