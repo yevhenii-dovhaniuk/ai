@@ -1,13 +1,13 @@
 // Режим розробки: паралельно запускає сервер (з автоперезапуском) і збірку веб-клієнта (watch).
-// Ctrl+C зупиняє обидва процеси.
+// Ctrl+C зупиняє обидва процеси. Запускаємо node напряму (без npm і shell).
 import { spawn, type ChildProcess } from "node:child_process";
 
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const tasks = ["dev:web", "dev:server"];
+const tasks: string[][] = [
+  ["scripts/build-web.ts", "--watch"],
+  ["--watch", "--env-file-if-exists=.env", "src/server/index.ts"],
+];
 
-const children: ChildProcess[] = tasks.map((task) =>
-  spawn(npm, ["run", "--silent", task], { stdio: "inherit", shell: process.platform === "win32" }),
-);
+const children: ChildProcess[] = tasks.map((args) => spawn(process.execPath, args, { stdio: "inherit" }));
 
 let stopping = false;
 function stopAll(code = 0): void {
