@@ -1,0 +1,11 @@
+{
+  // Веб-клієнт: тип-перевірка з DOM. Бандлить esbuild (scripts/build-web.ts).
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": [],
+    "module": "esnext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src"]
+}
