@@ -1,0 +1,5 @@
+# Однакові кінці рядків на Windows і в Linux/Docker
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.ico binary
