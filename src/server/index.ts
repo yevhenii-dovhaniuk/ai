@@ -1,6 +1,7 @@
-// Точка входу: конфіг → застосунок → HTTP-сервер. Акуратна зупинка по Ctrl+C / SIGTERM.
+// Точка входу: конфіг → модель → застосунок → HTTP-сервер. Акуратна зупинка по Ctrl+C / SIGTERM.
 import { createServer } from "node:http";
 import { networkInterfaces } from "node:os";
+import { createDraftModel } from "../ai/index.ts";
 import { createApp } from "./app.ts";
 import { loadConfig } from "./config.ts";
 import { createLogger } from "./logger.ts";
@@ -8,7 +9,15 @@ import { createLogger } from "./logger.ts";
 const config = loadConfig();
 const logger = createLogger(config.logLevel);
 
-const server = createServer(createApp({ config, logger }));
+logger.info("завантажую модель…");
+const model = await createDraftModel({ corpusPath: config.corpusPath, order: config.ngramOrder, tokenDelayMs: 15 });
+logger.info(`модель ${model.info.name} готова`, {
+  vocab: model.info.vocabSize,
+  params: model.info.parameters,
+  ...model.info.metrics,
+});
+
+const server = createServer(createApp({ config, logger, model }));
 server.requestTimeout = 5 * 60_000; // довгі генерації можуть тривати хвилини
 server.headersTimeout = 30_000;
 

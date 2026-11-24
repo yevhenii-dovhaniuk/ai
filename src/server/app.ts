@@ -1,21 +1,33 @@
 // Збирає HTTP-застосунок: /api/* → маршрути API, решта → файли веб-клієнта.
 import type { IncomingMessage, RequestListener, ServerResponse } from "node:http";
+import type { LanguageModel } from "../ai/index.ts";
 import type { Config } from "./config.ts";
 import { HttpError, sendJson } from "./http.ts";
 import type { Logger } from "./logger.ts";
-import { Router, type Context } from "./router.ts";
+import { compose, Router, type Context } from "./router.ts";
+import { chat } from "./routes/chat.ts";
 import { health } from "./routes/health.ts";
+import { info } from "./routes/info.ts";
+import { requireToken } from "./security/auth.ts";
+import { RateLimiter, rateLimit } from "./security/rate-limit.ts";
 import { serveStatic } from "./static.ts";
 
 export interface AppDeps {
   config: Config;
   logger: Logger;
+  model: LanguageModel;
 }
 
 export function createApp(deps: AppDeps): RequestListener {
-  const { config, logger } = deps;
+  const { config, logger, model } = deps;
 
-  const api = new Router().get("/api/health", health);
+  // Спершу ліміт (він же гальмує підбір токена), потім перевірка токена
+  const guarded = compose(rateLimit(new RateLimiter(config.rateLimitPerMinute)), requireToken(config.accessToken));
+
+  const api = new Router()
+    .get("/api/health", health)
+    .get("/api/info", guarded(info(model)))
+    .post("/api/chat", guarded(chat(model, logger)));
   const web = serveStatic(config.webDir);
 
   return async (req: IncomingMessage, res: ServerResponse) => {

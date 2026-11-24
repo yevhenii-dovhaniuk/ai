@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { createApp } from "../../src/server/app.ts";
 import { silentLogger } from "../../src/server/logger.ts";
-import { startServer, testConfig } from "./helpers.ts";
+import { fakeModel, startServer, testConfig } from "./helpers.ts";
 
 let dir: string;
 let server: Awaited<ReturnType<typeof startServer>>;
@@ -18,7 +18,7 @@ before(async () => {
   await writeFile(path.join(dir, "web", "app.js"), "console.log(1)");
   await writeFile(path.join(dir, "secret.txt"), "top secret");
   const config = testConfig({ webDir: path.join(dir, "web") });
-  server = await startServer(createApp({ config, logger: silentLogger }));
+  server = await startServer(createApp({ config, logger: silentLogger, model: fakeModel() }));
 });
 after(async () => {
   await server.close();

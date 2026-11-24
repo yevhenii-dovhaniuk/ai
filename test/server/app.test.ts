@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import type { IncomingMessage } from "node:http";
 import { clientIp, createApp } from "../../src/server/app.ts";
 import { silentLogger } from "../../src/server/logger.ts";
-import { startServer, testConfig } from "./helpers.ts";
+import { fakeModel, startServer, testConfig } from "./helpers.ts";
 
 let server: Awaited<ReturnType<typeof startServer>>;
 before(async () => {
-  server = await startServer(createApp({ config: testConfig(), logger: silentLogger }));
+  server = await startServer(createApp({ config: testConfig(), logger: silentLogger, model: fakeModel() }));
 });
 after(() => server.close());
 
