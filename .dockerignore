@@ -1,0 +1,8 @@
+node_modules
+dist
+checkpoints
+.git
+.env
+.env.*
+!.env.example
+*.log
