@@ -2,11 +2,93 @@
 <html lang="uk">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111318" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>AI</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="style.css" />
     <script type="module" src="main.js"></script>
   </head>
   <body>
-    <div id="app"></div>
+    <header class="topbar">
+      <div class="brand">
+        <img src="icon.svg" alt="" width="30" height="30" />
+        <div>
+          <h1>AI</h1>
+          <p id="model-name" class="muted">не підключено</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="new-chat" class="icon-btn" type="button" title="Новий чат" aria-label="Новий чат">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </button>
+        <button id="open-settings" class="icon-btn" type="button" title="Налаштування" aria-label="Налаштування">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
+            <circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="messages" class="messages" aria-live="polite">
+      <section id="empty" class="empty">
+        <img src="icon.svg" alt="" width="56" height="56" />
+        <h2>Привіт!</h2>
+        <p>Це власна мовна модель. Поки що вона — чернетка, яка продовжує ваш текст.</p>
+        <p class="muted">Спробуйте: «Добрий», «Київ», «Штучний інтелект»</p>
+      </section>
+    </main>
+
+    <form id="composer" class="composer" autocomplete="off">
+      <textarea id="input" rows="1" placeholder="Напишіть повідомлення…" enterkeyhint="send" aria-label="Повідомлення"></textarea>
+      <button id="send" class="send-btn" type="submit" aria-label="Надіслати">
+        <svg class="icon-send" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+        <svg class="icon-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" /></svg>
+      </button>
+    </form>
+
+    <dialog id="settings" aria-labelledby="settings-title">
+      <form id="settings-form" method="dialog">
+        <h2 id="settings-title">Налаштування</h2>
+
+        <label class="field">
+          <span>Токен доступу</span>
+          <input id="token" type="password" autocomplete="current-password" spellcheck="false" placeholder="ACCESS_TOKEN із .env сервера" />
+        </label>
+        <p id="token-status" class="status" role="status"></p>
+
+        <label class="field">
+          <span>Температура <output id="temperature-value"></output></span>
+          <input id="temperature" type="range" min="0" max="2" step="0.05" />
+          <small class="muted">0 — завжди найімовірніше, вище — сміливіше</small>
+        </label>
+
+        <div class="row">
+          <label class="field">
+            <span>Макс. токенів</span>
+            <input id="max-tokens" type="number" min="1" max="1000" inputmode="numeric" />
+          </label>
+          <label class="field">
+            <span>Top-k</span>
+            <input id="top-k" type="number" min="0" max="1000" inputmode="numeric" />
+          </label>
+        </div>
+
+        <details>
+          <summary>Про модель</summary>
+          <pre id="model-info" class="muted">—</pre>
+        </details>
+
+        <div class="dialog-actions">
+          <button class="btn ghost" value="cancel" formnovalidate>Закрити</button>
+          <button class="btn primary" value="save">Зберегти</button>
+        </div>
+      </form>
+    </dialog>
   </body>
 </html>
