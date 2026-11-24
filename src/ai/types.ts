@@ -42,8 +42,17 @@ export interface ModelInfo {
 
 export type PromptFormat = "plain" | "chat-template";
 
-/** Мовна модель: продовжує текст, віддаючи його шматочками (стрімом). */
+export interface GenerateResult {
+  /** stop: модель закінчила сама або натрапила на stop-рядок; length: maxTokens; aborted: скасовано. */
+  finishReason: "stop" | "length" | "aborted";
+  tokens: number;
+}
+
+/**
+ * Мовна модель: продовжує текст, віддаючи його шматочками (стрімом).
+ * Генератор віддає (yield) текст, а наприкінці повертає (return) GenerateResult.
+ */
 export interface LanguageModel {
   readonly info: ModelInfo;
-  generate(prompt: string, options: GenerateOptions): AsyncGenerator<string>;
+  generate(prompt: string, options: GenerateOptions): AsyncGenerator<string, GenerateResult>;
 }
