@@ -226,6 +226,7 @@ svg {
   font: inherit;
   resize: none;
   outline: none;
+  overflow-y: hidden;
 }
 
 .composer textarea:focus {
