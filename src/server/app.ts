@@ -1,10 +1,11 @@
-// Збирає HTTP-застосунок: маршрути API + обробка помилок.
+// Збирає HTTP-застосунок: /api/* → маршрути API, решта → файли веб-клієнта.
 import type { IncomingMessage, RequestListener, ServerResponse } from "node:http";
 import type { Config } from "./config.ts";
 import { HttpError, sendJson } from "./http.ts";
 import type { Logger } from "./logger.ts";
 import { Router, type Context } from "./router.ts";
 import { health } from "./routes/health.ts";
+import { serveStatic } from "./static.ts";
 
 export interface AppDeps {
   config: Config;
@@ -15,6 +16,7 @@ export function createApp(deps: AppDeps): RequestListener {
   const { config, logger } = deps;
 
   const api = new Router().get("/api/health", health);
+  const web = serveStatic(config.webDir);
 
   return async (req: IncomingMessage, res: ServerResponse) => {
     const started = performance.now();
@@ -32,6 +34,8 @@ export function createApp(deps: AppDeps): RequestListener {
     });
 
     try {
+      if (!url.pathname.startsWith("/api/")) return await web(ctx);
+
       const match = api.match(req.method ?? "GET", url.pathname);
       if (match && "handler" in match) return await match.handler(ctx);
       if (match) throw new HttpError(405, "Метод не підтримується", { Allow: match.notAllowed.join(", ") });
